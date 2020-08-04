@@ -7,13 +7,14 @@ from two_stock_causal_portfolio import optimal_rebalancing_strategy, postprocess
 from util import plot_stock_performance, compute_price_relatives
 
 
-def main(stocks):
+def universal_simulation(stock_1, stock_2):
 
-    # stocks = ["AMZN", "AAPL"]
+    stocks = [stock_1, stock_2]
 
     # Load Stock Data
 
     df_stocks = pd.read_csv("./data/stock_prices_8.csv")
+    df_stocks["Cash"] = 1
     df_stocks_relatives = compute_price_relatives(df_stocks)
 
     prelim_stock = plot_stock_performance(df_stocks, stocks,
@@ -42,9 +43,11 @@ def main(stocks):
     universal_multiplier = plot_wealth_multiplier(df_wealth_multiplier, stocks)
     universal_allocation = plot_portfolio_allocation(df_portfolio_weight, stocks)
 
-    return prelim_stock, prelim_multiplier, hindsight_optimal, universal_multiplier, universal_allocation
+    # prelim_stock, prelim_multiplier, hindsight_optimal, universal_multiplier, universal_allocation
+
+    return universal_multiplier
 
 
 if __name__ == "__main__":
-    main(stocks=["AMZN", "AAPL"])
+    universal_simulation("AMZN", "AAPL")
     print("Successfully completed")
