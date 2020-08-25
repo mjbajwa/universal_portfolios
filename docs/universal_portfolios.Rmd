@@ -3,7 +3,8 @@ title: "Universal Portfolios"
 author: "Jamal Bajwa"
 date: "05/08/2020"
 output: 
-  beamer_presentation:  
+  beamer_presentation:
+    theme: "AnnArbor"
     colortheme: "dolphin"
     fonttheme: "structurebold"
     slide_level: 2
@@ -18,20 +19,25 @@ knitr::opts_chunk$set(echo = FALSE, fig.align="center")
 
 ## Mean-Variance Portfolio Optimization
 
-- Sharpe and Markowitz (1960s)
-- Maximize Expected Arithmetic Returns subject to a variance constraint
+- Sharpe and Markowitz (1960s), based on Capital Asset Pricing Model (CAPM)
+- Maximize expected arithmetic return subject to a variance constraint (in a fixed window)
 - Modern portfolio theory tries to estimate expected return mean and variance of various stocks
--- Implicit in this assumption is that the return distribution is *Gaussian*, and can be estimated from empirical history of a stock
-- These estimates are inputs into an optimization model that allocates portfolio fractions subject to overall portfolio risk
--- Variance of the returns is thought of as "risk"
+-- Implicit in this assumption is that the return distribution is *Gaussian*, the mean and variance of which are estimated from empirical history of a stock
+- These estimates are inputs into an optimization model that allocates a portfolio subject to an *overall portfolio risk
+-- A rolling variance of a given stock is estimated, and used as a measure of "risk"
 
-## Mathematical Formulation
+## Mathematical Formulation (1)
 
-$$ Let \; b_i \; = \; the \; portfolio \; fraction \; invested \; in \; the \; i^{th} \; stock, \; \sum_{i=1}^{N} b_i = 1$$
-$$Assume \; each \; stock \; is\; Gaussian \; and \; Independent: \; N(\mu_i, \sigma_i)$$
-$$\mu_i = mean\; expected\; return\; from\; i^{th}\; stock $$
-$$\sigma_i = variance\; of\; i^{th}\; stock $$
-$$---$$
+- Assumptions
+
+- $Let \; b_i \; = \; the \; portfolio \; fraction \; invested \; in \; the \; i^{th} \; stock$ 
+- $\sum_{i=1}^{N} b_i = 1$
+- $Assume \; each \; stock \; is\; Gaussian \; and \; Independent: \; N(\mu_i, \sigma_i)$
+- $\mu_i = mean\; expected\; return\; from\; i^{th}\; stock$
+- $\sigma_i = variance\; of\; i^{th}\; stock$
+
+## Mathematical Formulation (2)
+
 $$maximize \; \sum_{i=1}^{N} b_i\mu_i $$
 $$s.t. \; \sigma_{portfolio} < \sigma_{max}$$
 
@@ -43,66 +49,117 @@ $$s.t. \; \sigma_{portfolio} < \sigma_{max}$$
 
 ## Shortcomings
 
--
--
--
+- How can we make such specific distributional assumptions about the future?
+- Even if we make distributional assumptions, how can we estimate the mean and variance using past data?
+- Why are we only optimizing over one investment horizon? Don't returns compound?
 
 # The Kelly Criterion
 
 ## Derivation
 
-- 
-- 
--
+- Kelly Criterion doesn't get rid of distributional assumptions but instead focuses on introducing compounding and multi-horizon decision into the optimization problem
 
-## Why was this so different?
+- Also known as log-optimal portfolio theory, because of the role that logarithms play
 
-- 
-- 
--
+- Let's derive the criterion for a bernoulli coin-toss, with probability $p$ of heads, payoff $o$ if heads and 0 if tails. We would like to invest a fraction f of our portfolio. Assume portfolio has 1 dollar. 
 
-## Samuelson's Criticisms
+## Derivation
 
-- 
-- 
--
+\begin{align*}
+S_{n} &= S_{o}\cdot(1 + f\cdot o)^{S}(1 - f)^{F} \\
+(\frac{S_{n}}{S_{o}})^{1/n} &= (1 + f\cdot o)^{S/n}(1 - f)^{F/n} \\
+\frac{1}{n} log \frac{S_{n}}{S_{o}} &= \frac{S}{n} log (1 + f\cdot o) + \frac{F}{n}log(1 - f) \\
+\lim_{n \rightarrow \infty} \frac{1}{n} log \frac{S_{n}}{S_{o}} &= p\cdot log (1 + f\cdot o) + (1-p)\cdot log(1 - f) \\
+G &= p\cdot log (1 + f\cdot o) + (1-p)\cdot log(1 - f)
+\end{align*}
+
+- $G \; is \; the \; growth \; rate$
+- $maximize \; G \;  \rightarrow  \; obtain \; \frac{\mathrm{d}G}{\mathrm{d} f} \; and \; set \; it \; to \; 0 \rightarrow optimal \ f^{*} is \; optimal \; allocation$
+
+<!-- - Remember the formulation of $G$, we will come back to it. -->
 
 # Shannon's Demon
 
+- Maintain a constant proportion of cash and stock for any random process
 - 
-- 
--
 
 # Cover's Universal Portfolio
 
-## Some primitives from Information Theory and Data Compression
+## What does it accomplish?
 
-- 
-- 
--
+- Proposes a rebalancing strategy that beats the best optimally rebalanced portfolio (even in hindsight!)
+- Simply put, this algorithm does as well as a lazy portfolio you might construct in hindsight that follows Shannon's demon
+- The mathematical intuition required to see this was nothing short of genius
+- Simple and elegant
 
-## Basic Idea of Universal Portfolio
+## Optimal, Constant Rebalanced Portfolio
 
-- 
-- 
--
+![Constant Rebalanced Portfolio](./images/1_constant_rebalanced_portfolio.png){width=200px, height=200px}
 
-## Why does this work?
+## Universal Portfolio
 
-- 
-- 
--
+![Universal Portfolio - asymptotically approaches optimal Constantly Rebalanced portfolio ](./images/2_universal_portfolio.png){width=200px, height=200px}
+
+## Universal Portfolio
+
+![Universal Portfolio - only causal information is utilized](./images/3_causal_linkage.png){width=200px, height=200px}
+
+
+## Significance
+
+- Cover (1991) proved that this algorithm asymptotically approaches **optimal, constantly rebalanced portfolio in hindsight**
+- Although Cover excludes Transaction costs, it is still unclear why this isn't more popular in practice 
+
+## Outline of Proof (Definitions)
+
+- Assume we have m stocks, so that $\mathbf{b}$ and $\mathbf{x_{i}}$ are m-dimensional vectors representing portfolio fractions and daily wealth multiples of the stocks
+
+- $Wealth \; after \; n \; investment \; periods$
+$$S_{n}(\mathbf{b},\;\mathbf{x}^{n}) \;= \; \prod_{i=1}^{n}\mathbf{b}^{t}\mathbf{x}_{i}$$ 
+- $Wealth \; if \; using \; optimal \; constant \; rebalanced \; portfolio$
+$$S_{n}^{*}(\mathbf{b^{*}},\;\mathbf{x}^{n}) \;= \; \prod_{i=1}^{n}\mathbf{b^{*}}^{t}\mathbf{x}_{i}$$ 
+- $Wealth \; if \; using \; causally \; rebalanced \; portfolio$
+$$\hat{S}_{n}(\mathbf{\hat{b}},\;\mathbf{x}^{n}) \;= \; \prod_{i=1}^{n}\mathbf{\hat{b}}^{t}\mathbf{x}_{i}$$ 
+
+## Outline of Proof (Definition)
+
+$$ The \; optimal \; causal \; portfolio \; is \;defined \;as: $$
+
+$$\mathbf{\hat{b}_{i+1}}(\mathbf{x^{i}}) = \frac {\int_{b \in B} \mathbf{b}S_i(b, \mathbf{x}^{i})d\mu(\mathbf{b})}{\int {S_i(b, \mathbf{x}^{i})d\mu(\mathbf{b})}}$$
+
+$$We \; wish \; to \; show \; \frac{\hat{S}_{n}}{{S}_{n}^{*}} \; is \; bounded$$
+
+## Outline of Proof
+
+- Assume $m \;= 2$ for simplicity (two stocks)
+- Let's call the multiplication of the dot-product in the wealth equation **product of sums**
+- We can alternatively write this **product of sums** as **sum of products**
+- This converts the problem from allocating the portfolio over n investment periods, to investing in $2^{m}$ possible trajectores in **one** investment period!
+
+## Outline of Proof
+
+$$\prod_{i=1}^{2} \mathbf{b_{i}^{t}} \mathbf{x}_{i} = ([b_{1,1}, b_{1,2}]\cdot [x_{1,1}, x_{1,2}])([b_{2,1}, b_{2,2}]\cdot [x_{2,1}, x_{2,2}])$$
+$$\prod_{i=1}^{2} \mathbf{b_{i}^{t}} \mathbf{x}_{i} = (b_{1,1}\cdot x_{1,1} + b_{1,2}\cdot x_{1,2})(b_{2,1}\cdot x_{2,1} + b_{2,2}\cdot x_{2,2})$$
+
+<!-- b_{1,1} \cdot x_{1,1} \cdot b_{2,1} \cdot x_{2,1} + \\  -->
+<!-- b_{1,1} \cdot x_{1,1} \cdot b_{2,2} \cdot x_{2,2} + \\ -->
+<!-- b_{1,2} \cdot x_{1,2} \cdot b_{2,1} \cdot x_{2,1} + \\ -->
+<!-- b_{1,2} \cdot x_{1,2} \cdot b_{2,2} \cdot x_{2,2}) \\ -->
+- Zooming into the RHS, re-arranging and using $b_{1, i} + b_{2,i} = 1$
+\begin{align*}
+{\color{blue} b_{1,1} \cdot b_{2,1}} \cdot {\color{green}x_{1,1}  \cdot x_{2,1}} + \\ 
+{\color{blue} b_{1,1} \cdot b_{2,2}} \cdot {\color{green}x_{1,1} \cdot x_{2,2}} + \\ 
+{\color{blue} b_{1,2} \cdot b_{2,1}} \cdot {\color{green}x_{1,2} \cdot x_{2,1}} + \\
+{\color{blue} b_{1,2} \cdot b_{2,2}} \cdot {\color{green}x_{1,2} \cdot x_{2,2}}
+\end{align*}
+
+- We are optimally allocating bets (in blue) over a sequence of outcomes (in green) in one investment period
+- The proof rests on viewing investment in this way!
 
 ## Some examples
 
-- 
-- 
--
+![Universal Portfolio - Amazon and Apple](./images/4_amzn_apply_output.png){width=250px, height=250px}
 
-# Speculations
 
-- 
-- 
--
 
 
